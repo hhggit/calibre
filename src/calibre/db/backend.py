@@ -1493,11 +1493,9 @@ class DB(object):
                         traceback.print_exc()
 
         if (not getattr(stream, 'name', False) or not samefile(dest, stream.name)):
-            with lopen(dest, 'wb') as f:
-                shutil.copyfileobj(stream, f)
-                size = f.tell()
-            if mtime is not None:
-                os.utime(dest, (mtime, mtime))
+            hardlink_file(stream.name, dest)
+            stream.seek(0, os.SEEK_END)
+            size = stream.tell()
         elif os.path.exists(dest):
             size = os.path.getsize(dest)
             if mtime is not None:
