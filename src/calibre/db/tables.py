@@ -587,16 +587,18 @@ class FormatsTable(ManyToManyTable):
 
     def read_maps(self, db):
         self.fname_map = fnm = defaultdict(dict)
+        self.fpas_map = fpm = defaultdict(dict)
         self.size_map = sm = defaultdict(dict)
         self.col_book_map = cbm = defaultdict(set)
         bcm = defaultdict(list)
 
-        for book, fmt, name, sz in db.execute('SELECT book, format, name, uncompressed_size FROM data'):
+        for book, fmt, name, sz, fpas in db.execute('SELECT book, format, name, uncompressed_size, fpas FROM data'):
             if fmt is not None:
                 fmt = fmt.upper()
                 cbm[fmt].add(book)
                 bcm[book].append(fmt)
                 fnm[book][fmt] = name
+                fpm[book][fmt] = fpas
                 sm[book][fmt] = sz
 
         self.book_col_map = {k:tuple(sorted(v)) for k, v in bcm.iteritems()}
@@ -605,6 +607,7 @@ class FormatsTable(ManyToManyTable):
         clean = ManyToManyTable.remove_books(self, book_ids, db)
         for book_id in book_ids:
             self.fname_map.pop(book_id, None)
+            self.fpas_map.pop(book_id, None)
             self.size_map.pop(book_id, None)
         return clean
 
@@ -640,7 +643,7 @@ class FormatsTable(ManyToManyTable):
     def rename_item(self, item_id, new_name, db):
         raise NotImplementedError('Cannot rename formats')
 
-    def update_fmt(self, book_id, fmt, fname, size, db):
+    def update_fmt(self, book_id, fmt, fname, size, db, fpas=""):
         fmts = list(self.book_col_map.get(book_id, []))
         try:
             fmts.remove(fmt)
@@ -655,9 +658,10 @@ class FormatsTable(ManyToManyTable):
             self.col_book_map[fmt] = {book_id}
 
         self.fname_map[book_id][fmt] = fname
+        self.fpas_map[book_id][fmt] = fpas
         self.size_map[book_id][fmt] = size
-        db.execute('INSERT OR REPLACE INTO data (book,format,uncompressed_size,name) VALUES (?,?,?,?)',
-                        (book_id, fmt, size, fname))
+        db.execute('INSERT OR REPLACE INTO data (book,format,uncompressed_size,name,fpas) VALUES (?,?,?,?,?)',
+                        (book_id, fmt, size, fname, fpas))
         return max(self.size_map[book_id].itervalues())
 
 

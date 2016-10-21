@@ -82,6 +82,7 @@ CREATE TABLE data ( id     INTEGER PRIMARY KEY,
                             format TEXT NOT NULL COLLATE NOCASE,
                             uncompressed_size INTEGER NOT NULL,
                             name TEXT NOT NULL,
+                            fpas TEXT,
                             UNIQUE(book, format)
 );
 CREATE TABLE feeds ( id   INTEGER PRIMARY KEY,

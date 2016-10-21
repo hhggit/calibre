@@ -468,6 +468,7 @@ class LibraryDatabase(object):
                             format TEXT NON NULL COLLATE NOCASE,
                             uncompressed_size INTEGER NON NULL,
                             data   BLOB NON NULL,
+                            fpas  TEXT,
                             UNIQUE(book, format)
                           );
         CREATE INDEX data_idx ON data (book);

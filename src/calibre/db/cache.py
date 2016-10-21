@@ -1348,8 +1348,8 @@ class Cache(object):
         except IndexError:
             author = _('Unknown')
 
-        size, fname = self.backend.add_format(book_id, fmt, stream, title, author, path, name, mtime=mtime)
-        return size, fname
+        size, fname, fpas = self.backend.add_format(book_id, fmt, stream, title, author, path, name, mtime=mtime)
+        return size, fname, fpas
 
     @api
     def add_format(self, book_id, fmt, stream_or_path, replace=True, run_hooks=True, dbapi=None):
@@ -1381,13 +1381,11 @@ class Cache(object):
                 return False
 
             stream = stream_or_path if hasattr(stream_or_path, 'read') else lopen(stream_or_path, 'rb')
-            size, fname = self._do_add_format(book_id, fmt, stream, name)
+            size, fname, fpas = self._do_add_format(book_id, fmt, stream, name)
             del stream
-
-            max_size = self.fields['formats'].table.update_fmt(book_id, fmt, fname, size, self.backend)
+            max_size = self.fields['formats'].table.update_fmt(book_id, fmt, fname, size, self.backend, fpas)
             self.fields['size'].table.update_sizes({book_id: max_size})
             self._update_last_modified((book_id,))
-
         if run_hooks:
             # Run post import plugins, the write lock is released so the plugin
             # can call api without a locking violation.

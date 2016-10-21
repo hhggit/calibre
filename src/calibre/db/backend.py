@@ -1244,6 +1244,12 @@ class DB(object):
                     raise
 
     def format_abspath(self, book_id, fmt, fname, path):
+        try:
+            fpas = self.tables["formats"].fpas_map[book_id][fmt.upper()];
+            if os.path.exists(fpas):
+                return fpas
+        except:
+            pass
         path = os.path.join(self.library_path, path)
         fmt = ('.' + fmt.lower()) if fmt else ''
         fmt_path = os.path.join(path, fname+fmt)
@@ -1471,7 +1477,7 @@ class DB(object):
         fmt = ('.' + fmt.lower()) if fmt else ''
         fname = self.construct_file_name(book_id, title, author, len(fmt))
         path = os.path.join(self.library_path, path)
-        dest = os.path.join(path, fname + fmt)
+        dest = stream.name if getattr(stream, 'name', False) else os.path.join(path, fname + fmt)
         if not os.path.exists(path):
             os.makedirs(path)
         size = 0
@@ -1501,7 +1507,7 @@ class DB(object):
             if mtime is not None:
                 os.utime(dest, (mtime, mtime))
 
-        return size, fname
+        return size, fname, dest
 
     def update_path(self, book_id, title, author, path_field, formats_field):
         path = self.construct_path_name(book_id, title, author)
