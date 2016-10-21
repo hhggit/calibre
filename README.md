@@ -1,3 +1,23 @@
+# What is this branch for?
+
+In general, calibre make a copy of the book when import it to the calibre library and totally forget about the oringinal book, and organize the copy in a different way. To keep the original book, save disk space and other reasons, I add a column into the meta database to record the books original file path, and the modified calibre use the original file instead of copy.
+
+# How to use?
+1. Compile the modified ".py" into ".pyo"
+
+  ```
+  python2 -O -m py_compile calibre_src_path\src\calibre\db\backend.py
+  python2 -O -m py_compile calibre_src_path\src\calibre\db\cache.py
+  python2 -O -m py_compile calibre_src_path\src\calibre\db\tables.py
+  ```    
+2. Replace the ".pyo" in calibre_binary_path\pylib.zip'.
+    Open the calibre_binary_path\pylib.zip with WinRAR, drag the calibre_src_path\src\calibre\db\(backend|cache|talbes).pyo into its calibre\db subdirectory, the compress method choose store only.    
+
+3. Modify the resource calibre_binary_path\resource\meta_data.sql file.
+
+
+-----------
+
 calibre
 =========
 
